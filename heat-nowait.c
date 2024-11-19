@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
 
   // Start the solve timer
   double tic = omp_get_wtime();
-  #pragma omp target enter data map(to:u[0:n*n],u_tmp[0:n*n])
+  #pragma omp target enter data map(to:u[0:n*n],u_tmp[0:n*n]) nowait depend(out:u,u_tmp)
   for (int t = 0; t < nsteps; ++t) {
 
     // Call the solve kernel
@@ -143,6 +143,7 @@ int main(int argc, char *argv[]) {
     u = u_tmp;
     u_tmp = tmp;
   }
+  #pragma omp taskwait
   #pragma omp target exit data map(from:u[0:n*n])
   // Stop solve timer
   double toc = omp_get_wtime();
@@ -206,10 +207,10 @@ void solve(const int n, const double alpha, const double dx, const double dt, co
   const double r2 = 1.0 - 4.0*r;
 
   // Loop over the nxn grid
-  #pragma omp target
+  #pragma omp target nowait depend(inout:u,u_tmp)
   #pragma omp loop collapse(2)
-  for (int j = 0; j < n; ++j) {
-    for (int i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i) {
+    for (int j = 0; j < n; ++j) {
 
       // Update the 5-point stencil, using boundary conditions on the edges of the domain.
       // Boundaries are zero because the MMS solution is zero there.
@@ -220,6 +221,7 @@ void solve(const int n, const double alpha, const double dx, const double dt, co
       r * ((j > 0)   ? u[i+(j-1)*n] : 0.0);
     }
   }
+  #pragma omp taskwait
 }
 
 

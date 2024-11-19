@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <omp.h>
-#define N 10000000
+#define N 100000000
 #define TOL  0.0000001
 //
 //  This is a simple program to add two vectors
@@ -30,8 +30,7 @@ int main()
    compute_time  = -omp_get_wtime();
    
    // add two vectors
-   #pragma omp target
-   #pragma omp loop
+   #pragma omp parallel for
    for (int i=0; i<N; i++){
       c[i] = a[i] + b[i];
    }

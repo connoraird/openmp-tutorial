@@ -1,10 +1,10 @@
 # for the NVIDIA nvhpc compiler (nvc)
 # copy to make.def
 
-CC          = nvc
+CC          = clang
 CLINKER     = $(CC)
-OPTFLAGS    = -fast -mp=gpu -gpu=cc75
-LIBS        =
+OPTFLAGS    = -O3 -fopenmp --offload-arch=sm_75 -DUSE_ALLOCATE=1
+LIBS        = 
 PRE         = ./
 
 CFLAGS    = $(OPTFLAGS)
